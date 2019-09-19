@@ -1,0 +1,9 @@
+categories:
+- Visualization
+- Epigenetics
+- Graphics
+- RNA
+description: Interactively visualize genomic data with Epiviz
+homepage_url: http://www.epiviz.org
+name: epiviz
+owner: jkanche

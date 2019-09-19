@@ -1,0 +1,91 @@
+<tool id="epiviz_export" name="Interactively visualize genomic data with Epiviz" version="0.1.0" python_template_version="3.5">
+    <requirements>
+    </requirements>
+     <command detect_errors="exit_code"><![CDATA[
+    	python $script_file 
+    ]]></command>
+    <configfiles>
+	<configfile name="script_file">
+import os
+import sys
+import json
+file_location = []
+file_type = []
+file_annotations = [] 
+#for $i, $s in enumerate($files)
+tloc = '${s.input}'
+tlocs = tloc.split("/")
+file_location.append("/data/" + tlocs[len(tlocs)-1])
+file_type.append('${s.format}')
+tanno = '${s.fileanno}'
+print(tanno)
+tanno = tanno.split(",")
+print(tanno)
+ttanno = {}
+for i in tanno:
+	ti = i.split(":")
+        ttanno[ti[0]] = ti[1]
+
+file_annotations.append(ttanno)
+#end for
+epiviz_json = []
+for i in range(0,len(file_location)):
+	fdatatype = "bp" if file_type[i] == "BigWig" else "annotation"
+	epiviz_json.append(
+	   {
+	     "url": file_location[i],
+	     "file_type": file_type[i],
+	     "datatype": fdatatype,
+	     "name": file_location[i],
+	     "id": file_location[i],
+	     "annotation": file_annotations[i],
+	     "metadata": []
+	     }
+	 )
+print epiviz_json
+fout = open('$output', "w")
+json.dump(epiviz_json, fout)
+fout.close()
+</configfile>
+    </configfiles>
+    <inputs>
+	<repeat name="files" title="Add File">
+        	<param type="data" name="input" format="bigbed,bigwig"/>
+		<param name="format" type="select" label="Data Format">
+                	<option value="BigWig" selected="true">BigWig</option>
+                	<option value="BigBed">BigBed</option>
+                	<option value="tbx">tbx</option>
+		</param>		
+		<param type ="text" name="fileanno" format="json" /> 
+	</repeat>
+    </inputs>
+    <outputs>
+	<data name="output" format="json" from_work_dir="output.json" />
+    </outputs>
+    <tests>
+        <test>
+            <param name="input" value="/test"/>
+            <param name="format" value="bigbed"/>
+            <param name="fileanno" value="annotation"/>
+            <output name="output">
+                <assert_contents>
+                    <has_line line="datatype" />
+                </assert_contents>
+            </output>
+        </test>
+    </tests>
+    <help><![CDATA[
+Usage: Choose files to interactively visualize with epiviz.
+    ]]></help>
+    <citations>
+        <citation type="bibtex">
+@misc{epiviz,
+  author = {epiviz},
+  year = {2019},
+  title = {epiviz},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  url = {https://github.com/epiviz/epivizGalaxyTool},
+}</citation>
+    </citations>
+</tool>
